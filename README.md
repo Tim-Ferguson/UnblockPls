@@ -1,15 +1,22 @@
-# Unblock
+# Unblockpls
 
-Sign in with X, post an unblock appeal (and an optional 280-character note) to someone who blocked you.
-They see it at `/@theirhandle` and click through to your X profile to unblock you.
+Blocked on X? Sign in, name who blocked you, and leave a note of up to 280 characters.
+They see it at `/@theirhandle`, open your profile on X to unblock you, and mark the appeal granted or declined.
 
-Cloudflare Worker + D1 + static assets. No framework, no build step beyond wrangler.
+Live at https://unblock.timo.gg
+
+- **Stack:** one Cloudflare Worker (server-rendered HTML, no framework), D1 for data, static assets for CSS/JS/fonts.
+- **Privacy:** notes are visible only to the sender and the recipient. Declined appeals are visible only to those two.
+  Who appealed to whom is public.
+- **X API use:** one `GET /2/users/me` call per sign-in. Profile pictures for people who haven't signed in come from
+  unavatar.io, cached at the edge for a week, with a generated letter avatar as fallback.
 
 ## Run locally
 
 ```sh
 npm install
-npm run db:local
+npm run db:local     # create the local D1 tables
+npm run seed         # optional: demo people and appeals
 npm run dev
 ```
 
@@ -20,25 +27,29 @@ SESSION_SECRET=anything
 DEV_LOGIN=1
 ```
 
-`DEV_LOGIN=1` enables `/auth/dev?handle=alice`, a stand-in for X sign-in so you can test without X credentials.
-Never set it in production.
+`DEV_LOGIN=1` turns "Sign in with X" into a local persona picker so everything can be tested without X credentials.
+It must never be set in production; without it `/auth/dev` returns 404.
 
 ## Deploy
 
-1. `npx wrangler d1 create unblock` and paste the `database_id` into `wrangler.jsonc`.
-2. Create an app at developer.x.com with OAuth 2.0 enabled (type: Web App, confidential client),
-   callback URL `https://unblock.timo.gg/auth/callback`, scopes `users.read` + `tweet.read`.
-3. Set Worker secrets:
-   ```sh
-   npx wrangler secret put X_CLIENT_ID
-   npx wrangler secret put X_CLIENT_SECRET
-   npx wrangler secret put SESSION_SECRET   # openssl rand -base64 32
-   ```
-4. Uncomment `routes` in `wrangler.jsonc` for the custom domain.
-5. Add `CLOUDFLARE_API_TOKEN` (Workers Scripts: Edit, D1: Edit) and `CLOUDFLARE_ACCOUNT_ID` as GitHub Actions
-   secrets; pushes to `main` then migrate D1 and deploy.
+```sh
+npm run db:remote    # apply migrations to the production D1
+npm run deploy
+```
 
-## X API usage
+Secrets (set once with `npx wrangler secret put NAME`):
 
-One call per sign-in (`GET /2/users/me`), nothing else. Sessions last 30 days. Handle search only covers accounts
-Unblock already knows (people who signed in or were appealed to); any valid handle can still be typed in.
+| Name | What |
+| --- | --- |
+| `SESSION_SECRET` | Random string that signs session cookies |
+| `X_CLIENT_ID`, `X_CLIENT_SECRET` | X OAuth 2.0 app (Web App, confidential client). Callback: `https://unblock.timo.gg/auth/callback`. Scopes: `users.read tweet.read` |
+
+Until the X secrets are set, the sign-in button shows a "Sign-in opens soon" page.
+
+## Layout
+
+- `src/index.ts` routes and actions
+- `src/auth.ts` sign-in (everything provider-specific lives here)
+- `src/views.ts` HTML
+- `public/` CSS, JS, fonts, share image
+- `migrations/` D1 schema

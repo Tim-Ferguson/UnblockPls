@@ -3,11 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --infer-origin-from-routes=false",
     "db:local": "wrangler d1 migrations apply unblock --local",
     "db:remote": "wrangler d1 migrations apply unblock --remote",
     "typecheck": "tsc --noEmit",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "seed": "wrangler d1 execute unblock --local --file scripts/seed.sql"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5",

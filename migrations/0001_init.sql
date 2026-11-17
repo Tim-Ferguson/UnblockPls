@@ -4,6 +4,7 @@ CREATE TABLE users (
   handle_lower TEXT NOT NULL,
   name TEXT NOT NULL,
   avatar TEXT,
+  closed INTEGER NOT NULL DEFAULT 0,  -- 1 = not accepting appeals
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL
 );
@@ -15,7 +16,9 @@ CREATE TABLE appeals (
   to_handle TEXT NOT NULL,        -- lowercased X handle of the person being appealed to
   note TEXT NOT NULL DEFAULT '',
   created_at INTEGER NOT NULL,
-  dismissed_at INTEGER,           -- set by the recipient; hides the appeal from their page
+  seen_at INTEGER,                -- recipient first opened their page while signed in
+  granted_at INTEGER,             -- recipient says they unblocked the sender
+  declined_at INTEGER,            -- recipient said no
   UNIQUE(from_id, to_handle)
 );
 CREATE INDEX appeals_to ON appeals(to_handle, created_at);

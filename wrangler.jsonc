@@ -8,12 +8,14 @@
     {
       "binding": "DB",
       "database_name": "unblock",
-      // Replace after `npx wrangler d1 create unblock`
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "88c3d7d6-bf10-4526-8736-76ce1978be7a",
       "migrations_dir": "migrations"
     }
   ],
-  "observability": { "enabled": true }
-  // When the domain is ready:
-  // "routes": [{ "pattern": "unblock.timo.gg", "custom_domain": true }]
+  "observability": { "enabled": true },
+  // Custom domain: Cloudflare creates the DNS record and certificate for this hostname.
+  "routes": [{ "pattern": "unblock.timo.gg", "custom_domain": true }],
+  // Hide the *.workers.dev and preview URLs so the site has one address (matters for sign-in callbacks).
+  "workers_dev": false,
+  "preview_urls": false
 }
