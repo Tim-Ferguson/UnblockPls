@@ -1,0 +1,19 @@
+{
+  "name": "unblock",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  // Files in public/ are served directly; everything else falls through to the Worker.
+  "assets": { "directory": "public" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "unblock",
+      // Replace after `npx wrangler d1 create unblock`
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": { "enabled": true }
+  // When the domain is ready:
+  // "routes": [{ "pattern": "unblock.timo.gg", "custom_domain": true }]
+}
